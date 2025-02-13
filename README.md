@@ -1,4 +1,4 @@
-# Autobot app
+# Autobot App with AI Summary and Free Hosting
 
 ## Resources used
 
