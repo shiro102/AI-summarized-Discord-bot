@@ -121,6 +121,9 @@ The credentials in `.dev.vars` are only applied locally. The production service 
 $ wrangler secret put DISCORD_TOKEN
 $ wrangler secret put DISCORD_PUBLIC_KEY
 $ wrangler secret put DISCORD_APPLICATION_ID
+$ wrangler secret put DISCORD_SERVER_ID
+$ wrangler secret put OPENAI_API_KEY
 ```
+
 ### Sample image
 ![image](https://github.com/user-attachments/assets/2f57245a-a68f-430a-bb95-5043042cb43a)
