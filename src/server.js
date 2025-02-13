@@ -11,6 +11,9 @@ import {
 import { AWW_COMMAND, INVITE_COMMAND } from './commands.js';
 import { getCuteUrl } from './reddit.js';
 import { InteractionResponseFlags } from 'discord-interactions';
+import { checkChannelStatus, summarizeChat } from './channel.js';
+
+const channelList = [];
 
 class JsonResponse extends Response {
   constructor(body, init) {
@@ -26,24 +29,36 @@ class JsonResponse extends Response {
 
 const router = AutoRouter();
 
+// GET endpoint to verify that the worker is running
 router.get('/', (request, env) => {
   return new Response(`👋 ${env.DISCORD_APPLICATION_ID}`);
 });
 
-router.post('/', async (request, env) => {
-  const { isValid, interaction } = await server.verifyDiscordRequest(request, env);
+// POST endpoint to handle interactions
+router.post('/', async (request, env, ctx) => {
+  await checkChannelStatus(env, channelList);
+  await summarizeChat(env, channelList);
+
+  // validate the request
+  const { isValid, interaction } = await server.verifyDiscordRequest(
+    request,
+    env,
+  );
   if (!isValid || !interaction) {
     return new Response('Bad request signature.', { status: 401 });
   }
 
+  // Check for pings commands
   if (interaction.type === InteractionType.PING) {
     return new JsonResponse({
       type: InteractionResponseType.PONG,
     });
   }
 
+  // Check for application commands
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     switch (interaction.data.name.toLowerCase()) {
+      // Handle the aww command by getting a cute url
       case AWW_COMMAND.name.toLowerCase(): {
         const cuteUrl = await getCuteUrl();
         return new JsonResponse({
@@ -53,6 +68,8 @@ router.post('/', async (request, env) => {
           },
         });
       }
+
+      // Handle the invite command by providing the invite url
       case INVITE_COMMAND.name.toLowerCase(): {
         const applicationId = env.DISCORD_APPLICATION_ID;
         const INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${applicationId}&scope=applications.commands`;
@@ -69,12 +86,14 @@ router.post('/', async (request, env) => {
     }
   }
 
+  // Handle unknown types
   console.error('Unknown Type');
   return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
 });
 
 router.all('*', () => new Response('Not Found.', { status: 404 }));
 
+// check for valid signature and timestamp
 async function verifyDiscordRequest(request, env) {
   const signature = request.headers.get('x-signature-ed25519');
   const timestamp = request.headers.get('x-signature-timestamp');
@@ -90,36 +109,17 @@ async function verifyDiscordRequest(request, env) {
   return { interaction: JSON.parse(body), isValid: true };
 }
 
-let lastCheckTimestamp = Math.floor(Date.now() / 1000) - 3600; // Initial timestamp (1 hour ago)
-
-async function checkChannelStatus(env) {
-  const channelId = env.DISCORD_CHANNEL_ID;
-  const url = `https://discord.com/api/v10/channels/${channelId}/messages?limit=100`;
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
-    },
-  });
-  
-  if (!response.ok) {
-    console.error('Failed to fetch channel messages:', response.statusText);
-    return;
-  }
-  
-  const messages = await response.json();
-  const newMessages = messages.filter(msg => Date.parse(msg.timestamp) / 1000 > lastCheckTimestamp);
-  console.log(`Channel ${channelId} has ${newMessages.length} new messages since the last check.`);
-  
-  lastCheckTimestamp = Math.floor(Date.now() / 1000); // Update timestamp
-}
-
-addEventListener('scheduled', event => {
-  event.waitUntil(checkChannelStatus(env));
-});
-
 const server = {
   verifyDiscordRequest,
   fetch: router.fetch,
 };
 
-export default server;
+export default {
+  async fetch(request, env, ctx) {
+    return server.fetch(request, env, ctx);
+  },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(await checkChannelStatus(env, channelList));
+    ctx.waitUntil(await summarizeChat(env, channelList));
+  },
+};

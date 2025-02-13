@@ -1,7 +1,7 @@
 {
   "name": "awwbot",
   "version": "1.0.0",
-  "description": "A simple discord bot that uses intents to post pictures from r/aww",
+  "description": "An automatic discord bot with summary chats feature",
   "type": "module",
   "private": true,
   "main": "src/server.js",
@@ -15,7 +15,7 @@
     "publish": "wrangler deploy"
   },
   "keywords": [],
-  "author": "Justin Beckwith <justin.beckwith@gmail.com>",
+  "author": "Khai Hung Luong <khaihungluong@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "discord-interactions": "^4.0.0",
