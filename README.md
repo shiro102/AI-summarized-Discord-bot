@@ -82,12 +82,11 @@ When a user types a slash command, Discord will send an HTTP request to a given 
 $ npm run ngrok
 ```
 
-![forwarding](![image](https://github.com/user-attachments/assets/c87a98da-d783-4ee8-9641-52eed478d7bc)
-)
+![forwarding](https://github.com/user-attachments/assets/8522533a-6f6e-4161-94d9-b40211871a84)
 
 This is going to bounce requests off of an external endpoint, and forward them to your machine. Copy the HTTPS link provided by the tool. It should look something like `https://8098-24-22-245-250.ngrok.io`. Now head back to the Discord Developer Dashboard, and update the "Interactions Endpoint URL" for your bot:
 
-![interactions-endpoint](https://user-images.githubusercontent.com/534619/157510959-6cf0327a-052a-432c-855b-c662824f15ce.png)
+![interactions-endpoint](https://github.com/user-attachments/assets/867e408e-9663-4f78-b284-bc9563b2b67d)
 
 This is the process we'll use for local testing and development. When you've published your bot to Cloudflare, you will _want to update this field to use your Cloudflare Worker URL._
 
