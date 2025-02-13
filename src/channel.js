@@ -91,7 +91,7 @@ export async function summarizeChat(env, channelList) {
           }); // Adjust locale and options as needed
           const parentMessageUrl = `${BASE_URL}/channels/${channel.id}/messages`;
           const placeholderBody = {
-            content: `📌 ***New Chat Summary***, channel: **${channel.name}**, ${formattedTimestamp}`, // This text will be shown in the channel.
+            content: `📌 ***New Chat Summary***, channel **${channel.name}**, ${formattedTimestamp}`, // This text will be shown in the channel.
             // Remove flags so the message isn’t ephemeral.
           };
 
