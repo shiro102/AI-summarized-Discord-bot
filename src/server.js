@@ -36,8 +36,6 @@ router.get('/', (request, env) => {
 
 // POST endpoint to handle interactions
 router.post('/', async (request, env, ctx) => {
-  await checkChannelStatus(env, channelList);
-  await summarizeChat(env, channelList);
 
   // validate the request
   const { isValid, interaction } = await server.verifyDiscordRequest(
