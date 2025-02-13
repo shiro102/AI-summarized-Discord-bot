@@ -1,5 +1,7 @@
 # Autobot App with AI Summary and Free Hosting
 
+The bot integrated with ChatGPT to automatically summarize conversations every hour. It also comes with a basic command of generating cute images (credit to [the original repo](https://github.com/discord/cloudflare-sample-app))
+
 ## Resources used
 
 - [Discord Interactions API](https://discord.com/developers/docs/interactions/receiving-and-responding)
@@ -120,3 +122,5 @@ $ wrangler secret put DISCORD_TOKEN
 $ wrangler secret put DISCORD_PUBLIC_KEY
 $ wrangler secret put DISCORD_APPLICATION_ID
 ```
+### Sample image
+![image](https://github.com/user-attachments/assets/2f57245a-a68f-430a-bb95-5043042cb43a)
