@@ -79,10 +79,19 @@ export async function summarizeChat(env, channelList) {
 
           // Step 1. Send a placeholder message to serve as the parent for the thread.
           const now = new Date();
-          const formattedTimestamp = now.toLocaleString(); // Adjust locale and options as needed
+          const formattedTimestamp = now.toLocaleString('en-US', {
+            timeZone: 'America/Los_Angeles', // PST/PDT time zone
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true,
+          }); // Adjust locale and options as needed
           const parentMessageUrl = `${BASE_URL}/channels/${channel.id}/messages`;
           const placeholderBody = {
-            content: `📌 **New Chat Summary**, channel ${channel.name} - ${formattedTimestamp}`, // This text will be shown in the channel.
+            content: `📌 ***New Chat Summary***, channel: **${channel.name}**, ${formattedTimestamp}`, // This text will be shown in the channel.
             // Remove flags so the message isn’t ephemeral.
           };
 
