@@ -82,7 +82,8 @@ When a user types a slash command, Discord will send an HTTP request to a given 
 $ npm run ngrok
 ```
 
-![forwarding](https://user-images.githubusercontent.com/534619/157511497-19c8cef7-c349-40ec-a9d3-4bc0147909b0.png)
+![forwarding](![image](https://github.com/user-attachments/assets/c87a98da-d783-4ee8-9641-52eed478d7bc)
+)
 
 This is going to bounce requests off of an external endpoint, and forward them to your machine. Copy the HTTPS link provided by the tool. It should look something like `https://8098-24-22-245-250.ngrok.io`. Now head back to the Discord Developer Dashboard, and update the "Interactions Endpoint URL" for your bot:
 
