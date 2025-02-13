@@ -1,10 +1,4 @@
-# Cloudflare worker example app
-
-awwbot is an example app that brings the cuteness of `r/aww` straight to your Discord server, hosted on Cloudflare workers. Cloudflare Workers are a convenient way to host Discord bots due to the free tier, simple development model, and automatically managed environment (no VMs!).
-
-The tutorial for building awwbot is [in the developer documentation](https://discord.com/developers/docs/tutorials/hosting-on-cloudflare-workers)
-
-![awwbot in action](https://user-images.githubusercontent.com/534619/157503404-a6c79d1b-f0d0-40c2-93cb-164f9df7c138.gif)
+# Autobot app
 
 ## Resources used
 
@@ -25,6 +19,7 @@ Below is a basic overview of the project structure:
 │   ├── reddit.js             -> Interactions with the Reddit API
 │   ├── register.js           -> Sets up commands with the Discord API
 │   ├── server.js             -> Discord app logic and routing
+│   ├── channel.js            -> Automated summary using Cloudflare's worker schedule
 ├── test
 |   ├── test.js               -> Tests for app
 ├── wrangler.toml             -> Configuration for Cloudflare workers
@@ -52,20 +47,6 @@ Next, you'll need to create a Cloudflare Worker.
 - Visit the [Cloudflare dashboard](https://dash.cloudflare.com/)
 - Click on the `Workers` tab, and create a new service using the same name as your Discord bot
 
-## Running locally
-
-First clone the project:
-
-```
-git clone https://github.com/discord/cloudflare-sample-app.git
-```
-
-Then navigate to its directory and install dependencies:
-
-```
-cd cloudflare-sample-app
-npm install
-```
 
 > ⚙️ The dependencies in this project require at least v18 of [Node.js](https://nodejs.org/en/)
 
@@ -139,7 +120,3 @@ $ wrangler secret put DISCORD_TOKEN
 $ wrangler secret put DISCORD_PUBLIC_KEY
 $ wrangler secret put DISCORD_APPLICATION_ID
 ```
-
-## Questions?
-
-Feel free to post an issue here, or reach out to [@justinbeckwith](https://twitter.com/JustinBeckwith)!
