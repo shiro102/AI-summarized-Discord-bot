@@ -46,7 +46,7 @@ export async function summarizeChat(env, channelList) {
       });
 
       if (!r.ok) {
-        console.error(`Failed to fetch channel messages for channel: ${channel.id}, error: `, r.statusText);
+        console.error(`Failed to fetch channel messages for channel: ${channel.name}, error: `, r.statusText);
         return;
       }
 
@@ -54,7 +54,7 @@ export async function summarizeChat(env, channelList) {
 
       if (messages.length >= 4) {
         console.log(
-          `Channel ${channel.id} has reached 4 or more new messages in 1 hour. Started summarizing.`,
+          `Channel ${channel.name} has reached 4 or more new messages in 1 hour. Started summarizing.`,
         );
 
         // make a string in this format: "username": "message" to feed to OpenAI
@@ -68,13 +68,13 @@ export async function summarizeChat(env, channelList) {
           )
           .join('\n');
 
-        console.log(`Channel ${channel.id} chat text: ${chatText}`);
+        console.log(`Channel ${channel.name} chat text: ${chatText}`);
 
         const rSummary = await sendTextToOpenAI(env, chatText);
 
         if (rSummary.choices) {
           console.log(
-            `Channel ${channel.id} chat text: ${JSON.stringify(rSummary)}`,
+            `Channel ${channel.name} chat text: ${JSON.stringify(rSummary)}`,
           );
 
           // Step 1. Send a placeholder message to serve as the parent for the thread.
@@ -82,7 +82,7 @@ export async function summarizeChat(env, channelList) {
           const formattedTimestamp = now.toLocaleString(); // Adjust locale and options as needed
           const parentMessageUrl = `${BASE_URL}/channels/${channel.id}/messages`;
           const placeholderBody = {
-            content: `📌 **New Chat Summary**, channel ${channel.id} - ${formattedTimestamp}`, // This text will be shown in the channel.
+            content: `📌 **New Chat Summary**, channel ${channel.name} - ${formattedTimestamp}`, // This text will be shown in the channel.
             // Remove flags so the message isn’t ephemeral.
           };
 
@@ -97,7 +97,7 @@ export async function summarizeChat(env, channelList) {
 
           if (!parentResponse.ok) {
             console.error(
-              `Failed to send parent message to create thread for channel: ${channel.id}, error: `,
+              `Failed to send parent message to create thread for channel: ${channel.name}, error: `,
               parentResponse.statusText,
             );
             return;
@@ -123,7 +123,7 @@ export async function summarizeChat(env, channelList) {
 
           if (!threadResponse.ok) {
             console.error(
-              `Failed to create thread from parent message for channel: ${channel.id}, error: `,
+              `Failed to create thread from parent message for channel: ${channel.name}, error: `,
               threadResponse.statusText,
             );
             return;
@@ -150,7 +150,7 @@ export async function summarizeChat(env, channelList) {
 
           if (!threadMessageResponse.ok) {
             console.error(
-              `Failed to send summary message inside thread for channel: ${channel.id}, error: `,
+              `Failed to send summary message inside thread for channel: ${channel.name}, error: `,
               threadMessageResponse.statusText,
             );
             return;
