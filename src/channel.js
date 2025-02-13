@@ -78,9 +78,11 @@ export async function summarizeChat(env, channelList) {
           );
 
           // Step 1. Send a placeholder message to serve as the parent for the thread.
+          const now = new Date();
+          const formattedTimestamp = now.toLocaleString(); // Adjust locale and options as needed
           const parentMessageUrl = `${BASE_URL}/channels/${channel.id}/messages`;
           const placeholderBody = {
-            content: '📌 **New Chat Summary**', // This text will be shown in the channel.
+            content: `📌 **New Chat Summary**, channel ${channel.id} - ${formattedTimestamp}`, // This text will be shown in the channel.
             // Remove flags so the message isn’t ephemeral.
           };
 
@@ -175,7 +177,7 @@ export async function sendTextToOpenAI(env, chatText) {
       {
         role: 'developer',
         content:
-          'Give a short summary the following conversation. Then, give bullet points items to summarize each separate items with details.',
+          'Give a short summary of the following conversation. Then give bullet points items to summarize each separate items with details.',
       },
       { role: 'user', content: chatText },
     ],
