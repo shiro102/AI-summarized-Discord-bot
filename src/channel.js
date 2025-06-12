@@ -74,7 +74,7 @@ export async function summarizeChat(env, channelList) {
 
         if (rSummary.choices) {
           console.log(
-            `Channel ${channel.name} chat text: ${JSON.stringify(rSummary)}`,
+            `Channel ${channel.name} OpenAI's response: ${JSON.stringify(rSummary)}`,
           );
 
           // Step 1. Send a placeholder message to serve as the parent for the thread.
@@ -177,6 +177,7 @@ export async function summarizeChat(env, channelList) {
   }
 }
 
+// send the chat text to OpenAI and return the summary
 export async function sendTextToOpenAI(env, chatText) {
   const url = `https://api.openai.com/v1/chat/completions`;
 

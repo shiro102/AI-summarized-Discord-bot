@@ -12,6 +12,7 @@ import { AWW_COMMAND, INVITE_COMMAND } from './commands.js';
 import { getCuteUrl } from './reddit.js';
 import { InteractionResponseFlags } from 'discord-interactions';
 import { checkChannelStatus, summarizeChat } from './channel.js';
+import { pingMyDuc } from './pingMyDuc.js';
 
 const channelList = [];
 
@@ -119,5 +120,6 @@ export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(await checkChannelStatus(env, channelList));
     ctx.waitUntil(await summarizeChat(env, channelList));
+    ctx.waitUntil(await pingMyDuc(env));
   },
 };
