@@ -1,8 +1,34 @@
 // initialize the constant variables
 const BASE_URL = 'https://discord.com/api/v10';
+const CHANNEL_LIST_KEY = 'discord_channel_list';
 
-// check for new channels, if yes append the channels' info to the channelList
-export async function checkChannelStatus(env, channelList) {
+// KV Storage helper functions
+async function getChannelListFromKV(env) {
+  try {
+    const stored = await env.CHANNEL_STORAGE.get(CHANNEL_LIST_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Error reading from KV storage:', error);
+    return [];
+  }
+}
+
+async function saveChannelListToKV(env, channelList) {
+  try {
+    await env.CHANNEL_STORAGE.put(
+      CHANNEL_LIST_KEY,
+      JSON.stringify(channelList),
+    );
+    console.log(`Saved ${channelList.length} channels to KV storage`);
+  } catch (error) {
+    console.error('Error saving to KV storage:', error);
+  }
+}
+
+// check for new channels, if yes append the channels' info to the channelList and save to KV
+export async function checkChannelStatus(env) {
+  // Load existing channel list from KV storage
+  const channelList = await getChannelListFromKV(env);
   const url = `${BASE_URL}/guilds/${env.DISCORD_SERVER_ID}/channels`;
 
   try {
@@ -18,6 +44,8 @@ export async function checkChannelStatus(env, channelList) {
     }
 
     const data = await r.json();
+    let hasNewChannels = false;
+
     for (const item of data) {
       // Filter channel with type = 0 (text channel) and append to channelList if not already present
       if (
@@ -26,7 +54,13 @@ export async function checkChannelStatus(env, channelList) {
       ) {
         console.log(`New channel detected: ${item.name}`);
         channelList.push(item);
+        hasNewChannels = true;
       }
+    }
+
+    // Save to KV storage if there were changes
+    if (hasNewChannels) {
+      await saveChannelListToKV(env, channelList);
     }
   } catch (err) {
     console.error(err);
@@ -34,7 +68,10 @@ export async function checkChannelStatus(env, channelList) {
 }
 
 // summarize the chat using OpenAI
-export async function summarizeChat(env, channelList) {
+export async function summarizeChat(env) {
+  // Load existing channel list from KV storage
+  const channelList = await getChannelListFromKV(env);
+
   try {
     for (const channel of channelList) {
       const url = `${BASE_URL}/channels/${channel.id}/messages?after=${channel.last_message_id}`;
@@ -46,20 +83,26 @@ export async function summarizeChat(env, channelList) {
       });
 
       if (!r.ok) {
-        console.error(`Failed to fetch channel messages for channel: ${channel.name}, error: `, r.statusText);
+        console.error(
+          `Failed to fetch channel messages for channel: ${channel.name}, error: `,
+          r.statusText,
+        );
         return;
       }
 
       const messages = await r.json();
 
-      if (messages.length >= 4) {
+      // if the channel has reached 8 or more new messages, start summarizing
+      if (messages.length >= 8) {
         console.log(
-          `Channel ${channel.name} has reached 4 or more new messages in 1 hour. Started summarizing.`,
+          `Channel ${channel.name} has reached 8 or more new messages. Started summarizing.`,
         );
 
         // make a string in this format: "username": "message" to feed to OpenAI
+        // Reverse the messages array to get chronological order (oldest to newest)
         const chatText = messages
           .filter((msg) => !msg.author.bot)
+          .reverse()
           .map(
             (msg) =>
               (msg.author.global_name || msg.author.username) +
@@ -145,7 +188,7 @@ export async function summarizeChat(env, channelList) {
           const summaryMessageBody = {
             content:
               rSummary.choices[0].message.content +
-              '\n\n (*An automated summary for conversation with more than 4 message within the last 1 hour using OpenAI. For longer conversations, please use Catch Me Up bot: https://discord.com/channels/1308157457822126141/1308157457822126143/1339446628725162054.*)',
+              '\n\n (*An automated summary for conversation with more than 8 messages for any channel within 30 minutes or more using OpenAI - keep waiting until a channel has more than 8 new messages.*)',
           };
 
           const threadMessageResponse = await fetch(threadMessageUrl, {
@@ -163,15 +206,21 @@ export async function summarizeChat(env, channelList) {
               threadMessageResponse.statusText,
             );
             return;
+          } else {
+            console.log(
+              `Successfully sent summary message inside thread for channel: ${channel.name}. 
+              Updating last_message_id to ${messages[0].id}, content: ${messages[0].content}`,
+            );
+
+            // update the last_message_id when the summary is sent to Discord
+            channel.last_message_id = messages[0].id;
           }
         }
       }
-
-      // update the last_message_id when the summary is sent to Discord or if the conversation is too short (in every hour as set in the CF worker schedule)
-      if (messages.length > 0) {
-        channel.last_message_id = messages[0].id;
-      }
     }
+
+    // Save updated channel list back to KV storage
+    await saveChannelListToKV(env, channelList);
   } catch (err) {
     console.error(err);
   }
@@ -187,7 +236,7 @@ export async function sendTextToOpenAI(env, chatText) {
       {
         role: 'developer',
         content:
-          'Give a short summary of the following conversation. Then give bullet points items to summarize each separate items with details.',
+          'Give a short summary of the following conversation, make it concise as much as possible. Then print out the text: "What To Do Next:" and then give some bullet points items to list out next important steps or tasks that need to be done, also be concise and use less bullet points as much as possible.',
       },
       { role: 'user', content: chatText },
     ],
@@ -204,7 +253,9 @@ export async function sendTextToOpenAI(env, chatText) {
     });
 
     if (!r.ok) {
-      console.error(`Failed to summarize chat using OpenAI: ${JSON.stringify(r)}`);
+      console.error(
+        `Failed to summarize chat using OpenAI: ${JSON.stringify(r)}`,
+      );
       return;
     } else {
       return r.json();

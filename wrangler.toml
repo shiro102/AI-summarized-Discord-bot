@@ -6,9 +6,16 @@ compatibility_date="2023-05-18"
 # DISCORD_TOKEN
 # DISCORD_PUBLIC_KEY
 # DISCORD_APPLICATION_ID
+# MYDUC_EMAIL
+# MYDUC_PASSWORD
+
+[[kv_namespaces]]
+binding = "CHANNEL_STORAGE"
+id = "621be526c8c24b1daf7a38b9f1988115"
+preview_id = "c9460a443c5a4653a705cfad01e8a6c0"
 
 [observability.logs]
 enabled = true
 
 [triggers]
-crons = ["0 */1 * * *"]
+crons = ["0,30 * * * *"]

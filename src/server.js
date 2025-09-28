@@ -14,8 +14,6 @@ import { InteractionResponseFlags } from 'discord-interactions';
 import { checkChannelStatus, summarizeChat } from './channel.js';
 import { pingMyDuc } from './pingMyDuc.js';
 
-const channelList = [];
-
 class JsonResponse extends Response {
   constructor(body, init) {
     const jsonBody = JSON.stringify(body);
@@ -118,8 +116,8 @@ export default {
     return server.fetch(request, env, ctx);
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(await checkChannelStatus(env, channelList));
-    ctx.waitUntil(await summarizeChat(env, channelList));
+    ctx.waitUntil(await checkChannelStatus(env));
+    ctx.waitUntil(await summarizeChat(env));
     ctx.waitUntil(await pingMyDuc(env));
   },
 };
