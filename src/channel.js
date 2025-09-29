@@ -236,7 +236,7 @@ export async function sendTextToOpenAI(env, chatText) {
       {
         role: 'developer',
         content:
-          'Give a short summary of the following conversation, make it concise as much as possible and easy to understand/natural. Then print out the text: "What To Do Next:" and then give some bullet points items to list out next important steps or tasks that need to be done, also be concise and use less bullet points as much as possible.',
+          'Give a short summary of the following conversation, make it concise as much as possible and easy to understand/natural. Then print out the text: "What To Do Next:" and then give some bullet points items to list out next important steps or tasks that need to be done with the name of the person in charge in the round bracket if the task is assigned to someone, also be concise and use less bullet points as much as possible.',
       },
       { role: 'user', content: chatText },
     ],
