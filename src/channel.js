@@ -188,7 +188,7 @@ export async function summarizeChat(env) {
           const summaryMessageBody = {
             content:
               rSummary.choices[0].message.content +
-              '\n\n (*An automated summary for conversation with more than 8 messages for any channel within 30 minutes or more using OpenAI - keep waiting until a channel has more than 8 new messages.*)',
+              '\n\n (*An automated summary for conversation with more than 8 messages for any channel within 30 minutes or more using OpenAI.*)',
           };
 
           const threadMessageResponse = await fetch(threadMessageUrl, {
@@ -236,7 +236,7 @@ export async function sendTextToOpenAI(env, chatText) {
       {
         role: 'developer',
         content:
-          'Give a short summary of the following conversation, make it concise as much as possible. Then print out the text: "What To Do Next:" and then give some bullet points items to list out next important steps or tasks that need to be done, also be concise and use less bullet points as much as possible.',
+          'Give a short summary of the following conversation, make it concise as much as possible and easy to understand/natural. Then print out the text: "What To Do Next:" and then give some bullet points items to list out next important steps or tasks that need to be done, also be concise and use less bullet points as much as possible.',
       },
       { role: 'user', content: chatText },
     ],
